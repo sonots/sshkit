@@ -1,4 +1,4 @@
-require 'thread'
+require 'parallel'
 
 module SSHKit
 
@@ -6,18 +6,14 @@ module SSHKit
 
     class Parallel < Abstract
       def execute
-        threads = []
-        hosts.each do |host|
-          threads << Thread.new(host) do |h|
-            begin
-              backend(h, &block).run
-            rescue Exception => e
-              e2 = ExecuteError.new e
-              raise e2, "Exception while executing on host #{host}: #{e.message}" 
-            end
+        ::Parallel.each(hosts, :in_processes => hosts.size) do |host|
+          begin
+            backend(host, &block).run
+          rescue Exception => e
+            e2 = ExecuteError.new e
+            raise e2, "Exception while executing on host #{host}: #{e.message}" 
           end
         end
-        threads.map(&:join)
       end
     end
 
