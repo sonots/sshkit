@@ -6,7 +6,7 @@ module SSHKit
       attr_writer :group_size
       def execute
         hosts.each_slice(group_size).collect do |group_hosts|
-          Parallel.new(group_hosts, &block).execute
+          Parallel.new(group_hosts, options, &block).execute
           sleep wait_interval
         end.flatten
       end

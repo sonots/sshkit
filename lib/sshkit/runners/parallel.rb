@@ -6,7 +6,8 @@ module SSHKit
 
     class Parallel < Abstract
       def execute
-        ::Parallel.each(hosts, :in_processes => hosts.size) do |host|
+        opts = options[:concurrency] == 'processes' ? {in_processes: hosts.size} : {in_threads: hosts.size}
+        ::Parallel.each(hosts, opts) do |host|
           begin
             backend(host, &block).run
           rescue Exception => e
